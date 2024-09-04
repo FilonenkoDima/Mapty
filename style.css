@@ -124,3 +124,22 @@ a:visited {
 .form__btn {
   display: none;
 }
+
+/* COPYRIGHT */
+.copyright {
+  margin-top: auto;
+  font-size: 1.3rem;
+  text-align: center;
+  color: var(--color-light--1);
+}
+
+.telegram-link:link,
+.telegram-link:visited {
+  color: var(--color-light--1);
+  transition: all 0.2s;
+}
+
+.telegram-link:hover,
+.telegram-link:active {
+  color: var(--color-light--2);
+}
