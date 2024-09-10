@@ -23,31 +23,6 @@ const inputDuration = document.querySelector(".form__input--duration");
 const inputCadence = document.querySelector(".form__input--cadence");
 const inputElevation = document.querySelector(".form__input--elevation");
 
-// if (navigator.geolocation)
-//   navigator.geolocation.getCurrentPosition(
-//     function (position) {
-//       const { latitude } = position.coords;
-//       const { longitude } = position.coords;
-//       console.log(`https://www.google.com/maps/@${latitude},${longitude}`);
-
-//       const coords = [latitude, longitude];
-
-//       const map = L.map("map").setView(coords, 13);
-
-//       L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-//         attribution:
-//           '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-//       }).addTo(map);
-
-//       L.marker(coords)
-//         .addTo(map)
-//         .bindPopup("A pretty CSS popup.<br> Easily customizable.")
-//         .openPopup();
-//     },
-//     function () {
-//       alert("Could not get your position");
-//     }
-//   );
 function initMap() {
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
@@ -55,30 +30,44 @@ function initMap() {
         const { latitude } = position.coords;
         const { longitude } = position.coords;
 
-        // Вивести координати на Google Maps
-        console.log(`https://www.google.com/maps/@${latitude},${longitude}`);
-
         const coords = { lat: latitude, lng: longitude };
 
-        // Ініціалізувати карту Google
         const map = new google.maps.Map(document.getElementById("map"), {
           center: coords,
           zoom: 13,
+          mapId: "MAP_ID",
         });
 
-        // Додати маркер на карту
-        const marker = new google.maps.Marker({
-          position: coords,
-          map: map,
+        google.maps.event.addListener(map, "click", function (event) {
+          console.log(event);
+          placeMarker(event.latLng);
         });
 
-        // Додати спливаюче вікно до маркера
-        const infoWindow = new google.maps.InfoWindow({
-          content: "A pretty CSS popup.<br> Easily customizable.",
-        });
-        marker.addListener("click", () => {
-          infoWindow.open(map, marker);
-        });
+        function placeMarker(location) {
+          const marker = new google.maps.marker.AdvancedMarkerElement({
+            position: location,
+            map: map,
+          });
+
+          const infoWindow = new google.maps.InfoWindow({
+            content: `
+          <div class="info-window-content running-window-content">
+            Workout
+          </div>`,
+          });
+
+          marker.addListener("click", () => {
+            infoWindow.open(map, marker);
+          });
+
+          google.maps.event.addListener(infoWindow, "domready", function () {
+            const iwOuter = document.querySelector(".gm-style-iw");
+            if (iwOuter) iwOuter.classList.add("workout");
+
+            const iwContainer = document.querySelector(".gm-style");
+            if (iwContainer) iwContainer.classList.add("workout");
+          });
+        }
       },
       function () {
         alert("Could not get your position");
