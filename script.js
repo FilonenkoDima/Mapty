@@ -23,6 +23,9 @@ const inputDuration = document.querySelector(".form__input--duration");
 const inputCadence = document.querySelector(".form__input--cadence");
 const inputElevation = document.querySelector(".form__input--elevation");
 
+let map;
+let mapEvent;
+
 function initMap() {
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
@@ -32,42 +35,18 @@ function initMap() {
 
         const coords = { lat: latitude, lng: longitude };
 
-        const map = new google.maps.Map(document.getElementById("map"), {
+        map = new google.maps.Map(document.getElementById("map"), {
           center: coords,
           zoom: 13,
           mapId: "MAP_ID",
         });
 
+        // Handling clicks on map
         google.maps.event.addListener(map, "click", function (event) {
-          console.log(event);
-          placeMarker(event.latLng);
+          mapEvent = event;
+          form.classList.remove("hidden");
+          inputDistance.focus();
         });
-
-        function placeMarker(location) {
-          const marker = new google.maps.marker.AdvancedMarkerElement({
-            position: location,
-            map: map,
-          });
-
-          const infoWindow = new google.maps.InfoWindow({
-            content: `
-          <div class="info-window-content running-window-content">
-            Workout
-          </div>`,
-          });
-
-          marker.addListener("click", () => {
-            infoWindow.open(map, marker);
-          });
-
-          google.maps.event.addListener(infoWindow, "domready", function () {
-            const iwOuter = document.querySelector(".gm-style-iw");
-            if (iwOuter) iwOuter.classList.add("workout");
-
-            const iwContainer = document.querySelector(".gm-style");
-            if (iwContainer) iwContainer.classList.add("workout");
-          });
-        }
       },
       function () {
         alert("Could not get your position");
@@ -75,3 +54,42 @@ function initMap() {
     );
   }
 }
+
+form.addEventListener("submit", function (e) {
+  e.preventDefault();
+
+  // Clear input fields
+  inputDistance.value =
+    inputDuration.value =
+    inputCadence.value =
+    inputElevation.value =
+      "";
+
+  // Display marker
+  const marker = new google.maps.marker.AdvancedMarkerElement({
+    position: mapEvent.latLng,
+    map: map,
+  });
+
+  const infoWindow = new google.maps.InfoWindow({
+    content: `
+          <div class="info-window-content running-window-content">
+            Workout
+          </div>`,
+  });
+
+  infoWindow.open(map, marker);
+
+  google.maps.event.addListener(infoWindow, "domready", function () {
+    const iwOuter = document.querySelector(".gm-style-iw");
+    if (iwOuter) iwOuter.classList.add("workout");
+
+    const iwContainer = document.querySelector(".gm-style");
+    if (iwContainer) iwContainer.classList.add("workout");
+  });
+});
+
+inputType.addEventListener("change", function () {
+  inputElevation.closest(".form__row").classList.toggle("form__row--hidden");
+  inputCadence.closest(".form__row").classList.toggle("form__row--hidden");
+});
