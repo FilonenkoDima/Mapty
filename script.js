@@ -23,78 +23,100 @@ const inputDuration = document.querySelector(".form__input--duration");
 const inputCadence = document.querySelector(".form__input--cadence");
 const inputElevation = document.querySelector(".form__input--elevation");
 
-let map;
-let mapEvent;
+class App {
+  #map;
+  #mapEvent;
 
-function initMap() {
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
-      function (position) {
-        const { latitude } = position.coords;
-        const { longitude } = position.coords;
+  constructor() {
+    this._getPosition();
+    form.addEventListener("submit", this._newWorkout.bind(this));
+    inputType.addEventListener("change", this._toggleElevationField);
+  }
 
-        const coords = { lat: latitude, lng: longitude };
+  _getPosition() {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        this._loadMap.bind(this),
+        function () {
+          alert("Could not get your position");
+        }
+      );
+    }
+  }
 
-        map = new google.maps.Map(document.getElementById("map"), {
-          center: coords,
-          zoom: 13,
-          mapId: "MAP_ID",
-        });
+  _loadMap(position) {
+    const { latitude } = position.coords;
+    const { longitude } = position.coords;
 
-        // Handling clicks on map
-        google.maps.event.addListener(map, "click", function (event) {
-          mapEvent = event;
-          form.classList.remove("hidden");
-          inputDistance.focus();
-        });
-      },
-      function () {
-        alert("Could not get your position");
-      }
+    const coords = { lat: latitude, lng: longitude };
+
+    this.#map = new google.maps.Map(document.getElementById("map"), {
+      center: coords,
+      zoom: 13,
+      mapId: "MAP_ID",
+    });
+
+    // Handling clicks on map
+    google.maps.event.addListener(
+      this.#map,
+      "click",
+      this._showForm.bind(this)
     );
   }
-}
 
-form.addEventListener("submit", function (e) {
-  e.preventDefault();
+  _showForm(event) {
+    this.#mapEvent = event;
+    form.classList.remove("hidden");
+    inputDistance.focus();
+  }
 
-  // Clear input fields
-  inputDistance.value =
-    inputDuration.value =
-    inputCadence.value =
-    inputElevation.value =
-      "";
+  _toggleElevationField() {
+    inputElevation.closest(".form__row").classList.toggle("form__row--hidden");
+    inputCadence.closest(".form__row").classList.toggle("form__row--hidden");
+  }
 
-  // Display marker
-  const marker = new google.maps.marker.AdvancedMarkerElement({
-    position: mapEvent.latLng,
-    map: map,
-  });
+  _newWorkout(e) {
+    e.preventDefault();
 
-  const infoWindow = new google.maps.InfoWindow({
-    content: `
+    // Clear input fields
+    inputDistance.value =
+      inputDuration.value =
+      inputCadence.value =
+      inputElevation.value =
+        "";
+
+    // Display marker
+    const marker = new google.maps.marker.AdvancedMarkerElement({
+      position: this.#mapEvent.latLng,
+      map: this.#map,
+    });
+
+    const infoWindow = new google.maps.InfoWindow({
+      content: `
           <div class="info-window-content running-window-content">
             Workout
           </div>`,
-  });
+    });
 
-  infoWindow.open(map, marker);
+    infoWindow.open(this.#map, marker);
 
-  google.maps.event.addListener(infoWindow, "domready", function () {
-    const iwOuter = document.querySelector(".gm-style-iw");
-    const hasInfoWindowContent = iwOuter?.querySelector(".info-window-content");
+    google.maps.event.addListener(infoWindow, "domready", function () {
+      const iwOuter = document.querySelector(".gm-style-iw");
+      const hasInfoWindowContent = iwOuter?.querySelector(
+        ".info-window-content"
+      );
 
-    if (hasInfoWindowContent) {
-      iwOuter.classList.add("workout");
-      const iwContainer = iwOuter.closest(".gm-style");
-      if (iwContainer) {
-        iwContainer.classList.add("workout");
+      if (hasInfoWindowContent) {
+        iwOuter.classList.add("workout");
+        const iwContainer = iwOuter.closest(".gm-style");
+        if (iwContainer) {
+          iwContainer.classList.add("workout");
+        }
       }
-    }
-  });
-});
+    });
+  }
+}
 
-inputType.addEventListener("change", function () {
-  inputElevation.closest(".form__row").classList.toggle("form__row--hidden");
-  inputCadence.closest(".form__row").classList.toggle("form__row--hidden");
-});
+function initMap() {
+  new App();
+}
