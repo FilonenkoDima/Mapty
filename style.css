@@ -173,35 +173,28 @@ a:visited {
 }
 
 .workout .gm-style-iw {
-  padding: 0 !important;
-  margin: 0 !important;
+  padding: 0;
+  margin: 0;
 }
 .workout .gm-style-iw-d {
-  position: relative !important;
-  padding: 0 !important;
-  margin: 0 !important;
+  position: relative;
   overflow: visible !important;
 }
 .workout .gm-ui-hover-effect {
-  position: absolute !important;
-  top: -1rem !important;
-  right: 0rem !important;
-  z-index: 1000;
+  position: absolute;
+  top: -1rem;
+  right: 0;
+  z-index: 1;
 }
 
 .workout .gm-style-iw-chr {
   height: 0;
 }
 
-.workout .gm-style-iw-d > div {
-  height: 100% !important;
-  width: 100% !important;
-}
-
 .workout div.gm-style-iw-tc::after {
-  background: var(--color-dark--1) !important;
+  background: var(--color-dark--1);
 }
 
-.workout .gm-style {
-  padding: 0 !important;
+.workout .gm-ui-hover-effect:focus-visible {
+  outline: none;
 }

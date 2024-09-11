@@ -82,10 +82,15 @@ form.addEventListener("submit", function (e) {
 
   google.maps.event.addListener(infoWindow, "domready", function () {
     const iwOuter = document.querySelector(".gm-style-iw");
-    if (iwOuter) iwOuter.classList.add("workout");
+    const hasInfoWindowContent = iwOuter?.querySelector(".info-window-content");
 
-    const iwContainer = document.querySelector(".gm-style");
-    if (iwContainer) iwContainer.classList.add("workout");
+    if (hasInfoWindowContent) {
+      iwOuter.classList.add("workout");
+      const iwContainer = iwOuter.closest(".gm-style");
+      if (iwContainer) {
+        iwContainer.classList.add("workout");
+      }
+    }
   });
 });
 
