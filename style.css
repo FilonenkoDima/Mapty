@@ -198,3 +198,15 @@ a:visited {
 .workout-info .gm-ui-hover-effect:focus-visible {
   outline: none;
 }
+
+.workout-info .gm-ui-hover-effect > span {
+  background-color: transparent !important;
+}
+
+.workout-info .gm-ui-hover-effect::before {
+  display: block;
+  content: "✖";
+  color: var(--color-light--1);
+  font-size: 1.5rem;
+  margin-top: 1.5em;
+}
