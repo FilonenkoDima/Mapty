@@ -172,29 +172,29 @@ a:visited {
   border-left: 5px solid var(--color-brand--1);
 }
 
-.workout .gm-style-iw {
+.workout-info .gm-style-iw {
   padding: 0;
   margin: 0;
 }
-.workout .gm-style-iw-d {
+.workout-info .gm-style-iw-d {
   position: relative;
   overflow: visible !important;
 }
-.workout .gm-ui-hover-effect {
+.workout-info .gm-ui-hover-effect {
   position: absolute;
   top: -1rem;
   right: 0;
   z-index: 1;
 }
 
-.workout .gm-style-iw-chr {
+.workout-info .gm-style-iw-chr {
   height: 0;
 }
 
-.workout div.gm-style-iw-tc::after {
+.workout-info div.gm-style-iw-tc::after {
   background: var(--color-dark--1);
 }
 
-.workout .gm-ui-hover-effect:focus-visible {
+.workout-info .gm-ui-hover-effect:focus-visible {
   outline: none;
 }

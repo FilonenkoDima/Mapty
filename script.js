@@ -15,14 +15,6 @@ const months = [
   "December",
 ];
 
-const form = document.querySelector(".form");
-const containerWorkouts = document.querySelector(".workouts");
-const inputType = document.querySelector(".form__input--type");
-const inputDistance = document.querySelector(".form__input--distance");
-const inputDuration = document.querySelector(".form__input--duration");
-const inputCadence = document.querySelector(".form__input--cadence");
-const inputElevation = document.querySelector(".form__input--elevation");
-
 class Workout {
   date = new Date();
   id = "10000000-1000-4000-8000-100000000000".replace(/[018]/g, (c) =>
@@ -39,6 +31,8 @@ class Workout {
 }
 
 class Running extends Workout {
+  type = "running";
+
   constructor(coords, distance, duration, cadence) {
     super(coords, distance, duration);
     this.cadence = cadence;
@@ -53,6 +47,8 @@ class Running extends Workout {
 }
 
 class Cycling extends Workout {
+  type = "cycling";
+
   constructor(coords, distance, duration, elevationGain) {
     super(coords, distance, duration);
     this.elevationGain = elevationGain;
@@ -68,9 +64,19 @@ class Cycling extends Workout {
 
 ///////////////////////////////////////////////
 // APPLICATION ARCHITECTURE
+
+const form = document.querySelector(".form");
+const containerWorkouts = document.querySelector(".workouts");
+const inputType = document.querySelector(".form__input--type");
+const inputDistance = document.querySelector(".form__input--distance");
+const inputDuration = document.querySelector(".form__input--duration");
+const inputCadence = document.querySelector(".form__input--cadence");
+const inputElevation = document.querySelector(".form__input--elevation");
+
 class App {
   #map;
   #mapEvent;
+  #workouts = [];
 
   constructor() {
     this._getPosition();
@@ -121,16 +127,65 @@ class App {
   }
 
   _newWorkout(e) {
+    const validInputs = (...inputs) =>
+      inputs.every((inp) => Number.isFinite(inp));
+    const allPositive = (...inputs) => inputs.every((inp) => inp > 0);
+
     e.preventDefault();
 
-    // Clear input fields
+    // Get data from form
+    const type = inputType.value;
+    const distance = +inputDistance.value;
+    const duration = +inputDuration.value;
+    const { lat, lng } = this.#mapEvent.latLng;
+    let workout;
+
+    // If activity running, create running object
+    if (type === "running") {
+      const cadence = +inputCadence.value;
+
+      // Check if data is valid
+      if (
+        !validInputs(distance, duration, cadence) ||
+        !allPositive(distance, duration, cadence)
+      )
+        return alert("Inputs have to be positive numbers!");
+
+      workout = new Running([lat, lng], distance, duration, cadence);
+    }
+
+    // If activity cycling, create cycling object
+    if (type === "cycling") {
+      const elevation = +inputElevation.value;
+
+      // Check if data is valid
+      if (
+        !validInputs(distance, duration, elevation) ||
+        !allPositive(distance, duration)
+      )
+        return alert("Inputs have to be positive numbers!");
+
+      workout = new Cycling([lat, lng], distance, duration, elevation);
+    }
+
+    // Add new object to workout array
+    this.#workouts.push(workout);
+    console.log(workout);
+
+    // Render workout on map as marker
+    this.renderWorkoutMarker(workout);
+
+    // Render workout on list
+
+    // Hide form + clear input fields
     inputDistance.value =
       inputDuration.value =
       inputCadence.value =
       inputElevation.value =
         "";
+  }
 
-    // Display marker
+  renderWorkoutMarker(workout) {
     const marker = new google.maps.marker.AdvancedMarkerElement({
       position: this.#mapEvent.latLng,
       map: this.#map,
@@ -138,8 +193,8 @@ class App {
 
     const infoWindow = new google.maps.InfoWindow({
       content: `
-          <div class="info-window-content running-window-content">
-            Workout
+          <div class="info-window-content ${workout.type}-window-content">
+            ${workout.type}
           </div>`,
     });
 
@@ -152,10 +207,10 @@ class App {
       );
 
       if (hasInfoWindowContent) {
-        iwOuter.classList.add("workout");
+        iwOuter.classList.add("workout-info");
         const iwContainer = iwOuter.closest(".gm-style");
         if (iwContainer) {
-          iwContainer.classList.add("workout");
+          iwContainer.classList.add("workout-info");
         }
       }
     });
