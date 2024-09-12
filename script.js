@@ -173,9 +173,10 @@ class App {
     console.log(workout);
 
     // Render workout on map as marker
-    this.renderWorkoutMarker(workout);
+    this._renderWorkoutMarker(workout);
 
     // Render workout on list
+    this._renderWorkout(workout);
 
     // Hide form + clear input fields
     inputDistance.value =
@@ -185,7 +186,7 @@ class App {
         "";
   }
 
-  renderWorkoutMarker(workout) {
+  _renderWorkoutMarker(workout) {
     const marker = new google.maps.marker.AdvancedMarkerElement({
       position: this.#mapEvent.latLng,
       map: this.#map,
@@ -215,6 +216,8 @@ class App {
       }
     });
   }
+
+  _renderWorkout() {}
 }
 
 function initMap() {
