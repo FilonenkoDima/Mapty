@@ -8,6 +8,8 @@ class Workout {
       (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (+c / 4)))
     ).toString(16)
   );
+  clicks = 0;
+
   constructor(coords, distance, duration) {
     this.coords = coords; // [lat, lng]
     this.distance = distance; // in km
@@ -33,6 +35,10 @@ class Workout {
     this.description = `${this.type[0].toUpperCase()}${this.type.slice(1)} on ${
       months[this.date.getMonth()]
     } ${this.date.getDate()}`;
+  }
+
+  click() {
+    this.clicks++;
   }
 }
 
@@ -83,6 +89,7 @@ const inputElevation = document.querySelector(".form__input--elevation");
 
 class App {
   #map;
+  #mapZoomLevel = 13;
   #mapEvent;
   #workouts = [];
 
@@ -90,6 +97,10 @@ class App {
     this._getPosition();
     form.addEventListener("submit", this._newWorkout.bind(this));
     inputType.addEventListener("change", this._toggleElevationField);
+    containerWorkouts.addEventListener(
+      "click",
+      this._moveToInfoWindow.bind(this)
+    );
   }
 
   _getPosition() {
@@ -111,7 +122,7 @@ class App {
 
     this.#map = new google.maps.Map(document.getElementById("map"), {
       center: coords,
-      zoom: 13,
+      zoom: this.#mapZoomLevel,
       mapId: "MAP_ID",
     });
 
@@ -191,7 +202,6 @@ class App {
 
     // Add new object to workout array
     this.#workouts.push(workout);
-    console.log(workout);
 
     // Render workout on map as marker
     this._renderWorkoutMarker(workout);
@@ -208,6 +218,8 @@ class App {
       position: this.#mapEvent.latLng,
       map: this.#map,
     });
+
+    workout.coords = marker.position;
 
     const infoWindow = new google.maps.InfoWindow({
       content: `
@@ -283,6 +295,22 @@ class App {
         `;
 
     form.insertAdjacentHTML("afterend", html);
+  }
+
+  _moveToInfoWindow(e) {
+    const workoutElement = e.target.closest(".workout");
+    console.log(workoutElement);
+
+    if (!workoutElement) return;
+
+    const workout = this.#workouts.find(
+      (work) => work.id === workoutElement.dataset.id
+    );
+
+    this.#map.panTo(workout.coords);
+
+    workout.click();
+    console.log(workout.clicks);
   }
 }
 
