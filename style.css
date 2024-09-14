@@ -259,3 +259,52 @@ a:visited {
   font-size: 1.5rem;
   margin-top: 1.5em;
 }
+
+/* RESPONSIVE DESIGN  */
+@media only screen and (max-width: 75em) {
+  html {
+    font-size: 50%;
+  }
+}
+
+@media only screen and (max-width: 62.5em) {
+  html {
+    font-size: 43.75%;
+  }
+}
+
+@media only screen and (max-width: 56.25em) {
+  .workout {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .sidebar {
+    flex-basis: 35rem;
+    padding: 1rem 3rem 2rem 3rem;
+  }
+}
+
+@media only screen and (max-width: 43.75em) {
+  body {
+    flex-direction: column;
+    overscroll-behavior-y: auto;
+    height: 180vh;
+
+    padding: 0;
+  }
+
+  .sidebar {
+    width: 100%;
+    height: 80vh;
+    flex-basis: auto;
+  }
+
+  #map {
+    width: 100%;
+    height: 100vh;
+  }
+
+  .workout {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
