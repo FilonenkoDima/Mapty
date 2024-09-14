@@ -8,7 +8,6 @@ class Workout {
       (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (+c / 4)))
     ).toString(16)
   );
-  clicks = 0;
 
   constructor(coords, distance, duration) {
     this.coords = coords; // [lat, lng]
@@ -35,10 +34,6 @@ class Workout {
     this.description = `${this.type[0].toUpperCase()}${this.type.slice(1)} on ${
       months[this.date.getMonth()]
     } ${this.date.getDate()}`;
-  }
-
-  click() {
-    this.clicks++;
   }
 }
 
@@ -94,7 +89,13 @@ class App {
   #workouts = [];
 
   constructor() {
+    // Get user's position
     this._getPosition();
+
+    // Get data from local storage
+    this._getLocalStaorage();
+
+    // Attach event handlers
     form.addEventListener("submit", this._newWorkout.bind(this));
     inputType.addEventListener("change", this._toggleElevationField);
     containerWorkouts.addEventListener(
@@ -118,7 +119,8 @@ class App {
     const { latitude } = position.coords;
     const { longitude } = position.coords;
 
-    const coords = { lat: latitude, lng: longitude };
+    // const coords = { lat: latitude, lng: longitude };
+    const coords = new google.maps.LatLng(latitude, longitude);
 
     this.#map = new google.maps.Map(document.getElementById("map"), {
       center: coords,
@@ -132,6 +134,10 @@ class App {
       "click",
       this._showForm.bind(this)
     );
+
+    this.#workouts.forEach((work) => {
+      this._renderWorkoutMarker(work);
+    });
   }
 
   _showForm(event) {
@@ -169,7 +175,11 @@ class App {
     const type = inputType.value;
     const distance = +inputDistance.value;
     const duration = +inputDuration.value;
-    const { lat, lng } = this.#mapEvent.latLng;
+    const { lat, lng } = {
+      lat: this.#mapEvent.latLng.lat(),
+      lng: this.#mapEvent.latLng.lng(),
+    };
+
     let workout;
 
     // If activity running, create running object
@@ -211,11 +221,21 @@ class App {
 
     // Hide form + clear input fields
     this._hideForm();
+
+    // Set local storage to all workouts
+    this._setLocalStorage();
   }
 
   _renderWorkoutMarker(workout) {
+    if (Array.isArray(workout.coords) && workout.coords.length > 0) {
+      workout.coords = new google.maps.LatLng(
+        workout.coords[0],
+        workout.coords[1]
+      );
+    }
+
     const marker = new google.maps.marker.AdvancedMarkerElement({
-      position: this.#mapEvent.latLng,
+      position: workout.coords,
       map: this.#map,
     });
 
@@ -299,7 +319,6 @@ class App {
 
   _moveToInfoWindow(e) {
     const workoutElement = e.target.closest(".workout");
-    console.log(workoutElement);
 
     if (!workoutElement) return;
 
@@ -308,9 +327,27 @@ class App {
     );
 
     this.#map.panTo(workout.coords);
+  }
 
-    workout.click();
-    console.log(workout.clicks);
+  _setLocalStorage() {
+    localStorage.setItem("workouts", JSON.stringify(this.#workouts));
+  }
+
+  _getLocalStaorage() {
+    const data = JSON.parse(localStorage.getItem("workouts"));
+
+    if (!data) return;
+
+    this.#workouts = data;
+
+    this.#workouts.forEach((work) => {
+      this._renderWorkout(work);
+    });
+  }
+
+  static reset() {
+    localStorage.removeItem("workouts");
+    location.reload();
   }
 }
 
